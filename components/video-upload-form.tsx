@@ -11,7 +11,7 @@ const LANGUAGES = [
   
   { value: "es", label: "Spanish" },
   { value: "fr", label: "French" },
-  { value: "de", label: "German" },
+  // { value: "de", label: "German" },
   { value: "el", label: "Greek" },
   { value: "ko", label: "Korean" },
   {value:"ta",label:"Tamil"},

@@ -71,7 +71,7 @@ export default function Home() {
       formData.append("language", language)
 
       // The frontend no longer waits for the whole process
-      const response = await fetch("http://localhost:5000/api/process-video", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/process-video`, {
         method: "POST",
         body: formData,
       })
