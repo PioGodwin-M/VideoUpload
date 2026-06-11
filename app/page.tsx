@@ -34,7 +34,8 @@ export default function Home() {
           // --- SUCCESS ---
           clearInterval(interval) // Stop polling
           setIsLoading(false)
-          setResponseVideoUrl(data.videoUrl)
+          const fullVideoUrl = `${process.env.NEXT_PUBLIC_API_URL}${data.videoUrl}`;
+          setResponseVideoUrl(fullVideoUrl);
           setTaskId(null) // Clear the task ID
         } else if (data.status === "error") {
           // --- FAILED ---
