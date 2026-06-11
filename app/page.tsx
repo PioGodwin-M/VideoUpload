@@ -23,7 +23,11 @@ export default function Home() {
     // Set up an interval to check the status every 5 seconds
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/check-status?id=${taskId}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/check-status?id=${taskId}`, {
+  headers: {
+    "ngrok-skip-browser-warning": "69420"
+  }
+})
         if (!response.ok) {
           throw new Error("Failed to check status")
         }
@@ -72,10 +76,13 @@ export default function Home() {
       formData.append("language", language)
 
       // The frontend no longer waits for the whole process
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/process-video`, {
-        method: "POST",
-        body: formData,
-      })
+     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/process-video`, {
+  method: "POST",
+  body: formData,
+  headers: {
+    "ngrok-skip-browser-warning": "69420"
+  }
+})
 
       if (!response.ok) {
          const errData = await response.json()
