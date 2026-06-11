@@ -23,7 +23,7 @@ export default function Home() {
     // Set up an interval to check the status every 5 seconds
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/check-status?id=${taskId}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/check-status?id=${taskId}`)
         if (!response.ok) {
           throw new Error("Failed to check status")
         }
