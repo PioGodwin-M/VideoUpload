@@ -11,23 +11,23 @@ export default function Home() {
   const [responseVideoUrl, setResponseVideoUrl] = useState<string>("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>("")
-  const [taskId, setTaskId] = useState<string | null>(null) // --- NEW: To store the Job ID
+  const [taskId, setTaskId] = useState<string | null>(null)
 
-  // --- NEW: This useEffect hook will poll for the video status ---
+  // --- This useEffect hook will poll for the video status ---
   useEffect(() => {
-    // We only poll if we are in a loading state and have a taskId
     if (!isLoading || !taskId) {
       return
     }
 
-    // Set up an interval to check the status every 5 seconds
     const interval = setInterval(async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/check-status?id=${taskId}`, {
-  headers: {
-    "ngrok-skip-browser-warning": "69420"
-  }
-})
+          headers: {
+            "ngrok-skip-browser-warning": "69420",
+            "X-DubSync-API-Key": process.env.NEXT_PUBLIC_API_KEY as string // <-- NEW: Security Header
+          }
+        })
+        
         if (!response.ok) {
           throw new Error("Failed to check status")
         }
@@ -36,69 +36,64 @@ export default function Home() {
 
         if (data.status === "complete") {
           // --- SUCCESS ---
-          clearInterval(interval) // Stop polling
+          clearInterval(interval) 
           setIsLoading(false)
           const fullVideoUrl = `${process.env.NEXT_PUBLIC_API_URL}${data.videoUrl}`;
           setResponseVideoUrl(fullVideoUrl);
-          setTaskId(null) // Clear the task ID
+          setTaskId(null) 
         } else if (data.status === "error") {
           // --- FAILED ---
-          clearInterval(interval) // Stop polling
+          clearInterval(interval) 
           setIsLoading(false)
           setError(data.error || "An unknown error occurred during processing.")
-          setTaskId(null) // Clear the task ID
+          setTaskId(null) 
         }
-        // If status is "processing", the interval will just run again
       } catch (err) {
         clearInterval(interval)
         setIsLoading(false)
         setError(err instanceof Error ? err.message : "Failed to fetch status")
         setTaskId(null)
       }
-    }, 5000) // Poll every 5 seconds
+    }, 5000) 
 
-    // Cleanup function: This stops the interval if the component unmounts
     return () => clearInterval(interval)
     
-  }, [isLoading, taskId]) // This effect re-runs if isLoading or taskId changes
+  }, [isLoading, taskId]) 
 
   const handleUpload = async (file: File, language: string) => {
     setUploadedFile(file)
     setSelectedLanguage(language)
     setIsLoading(true)
     setError("")
-    setResponseVideoUrl("") // Clear any old video
-    setTaskId(null) // Clear any old task
+    setResponseVideoUrl("") 
+    setTaskId(null) 
 
     try {
       const formData = new FormData()
       formData.append("video", file)
       formData.append("language", language)
 
-      // The frontend no longer waits for the whole process
-     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/process-video`, {
-  method: "POST",
-  body: formData,
-  headers: {
-    "ngrok-skip-browser-warning": "69420"
-  }
-})
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/process-video`, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "ngrok-skip-browser-warning": "69420",
+          "X-DubSync-API-Key": process.env.NEXT_PUBLIC_API_KEY as string // <-- NEW: Security Header
+        }
+      })
 
       if (!response.ok) {
          const errData = await response.json()
         throw new Error(errData.error || "Failed to start processing video")
       }
 
-      // --- The backend returns the taskId immediately ---
       const data = await response.json()
       setTaskId(data.taskId)
       
-      // We DON'T set isLoading(false) here. The useEffect will do that.
-
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred")
       console.error("Upload error:", err)
-      setIsLoading(false) // Set loading to false only if the *initial* request fails
+      setIsLoading(false) 
     }
   }
 
